@@ -1,0 +1,10 @@
+Final Year project
+
+Note: The aim is not to build a replacement for the cloud but rather to simplify basic cloud functionalities to get tech startups going and then to educate them on what next steps should be taken in their cloud use. 
+
+At minimum the tech startup should be able to
+1. Provision a virtual machine and know it's state from the cloud management infrastructure system.
+2. SSH into these VMs
+3. Create a Network and Subnetwork
+4. Create Firewall Rules
+5. Teach on creating a 3 tier architecture.
