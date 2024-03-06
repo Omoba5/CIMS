@@ -16,7 +16,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// tmpl := template.Must(template.ParseFiles("dashboard.html"))
 		// tmpl.Execute(w, r)
-		tmpl, err := template.ParseFiles("dashboard.html")
+		tmpl, err := template.ParseFiles("login.html")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
