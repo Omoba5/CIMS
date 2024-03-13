@@ -1,0 +1,19 @@
+User Registration
+- Add Password Verification by ensuring confirm password equality
+- Add some functionality to implement some username and password requirement
+- Transform all the Handlers into a there functions outside main()
+- Create error messages for password mismatch and other requirements
+- Hash Passwords using bycrypt
+- Handle form such that old data is not uploaded and protect the database from duplicate records/documents
+- 
+
+
+err = collection.FindOne(context.Background(), bson.M{"username": userName}).Decode(&existingUser)
+    if err == nil {
+        // User name already exists, handle the case accordingly
+        fmt.Println("User name already exists:", existingUser)
+        return
+    } else if err != mongo.ErrNoDocuments {
+        // Error occurred during the query
+        log.Fatal(err)
+    }

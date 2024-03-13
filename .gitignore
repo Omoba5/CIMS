@@ -1,0 +1,7 @@
+# Ignore files created by air
+
+tmp
+
+
+# Ignore env file
+.env
