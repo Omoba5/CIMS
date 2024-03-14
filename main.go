@@ -24,6 +24,11 @@ type User struct {
 	Address     string
 }
 
+type Userlogin struct {
+	Username string
+	Password string
+}
+
 type VirtualMachine struct {
 	VMName      string
 	Username    string
@@ -68,41 +73,97 @@ type Subnet struct {
 	Gateway          string
 }
 
+var tmpl *template.Template
+var err error
+var dbHost string
+var dbPass string
+var dbUser string
+
 func main() {
-	tmpl, err := template.ParseGlob("*.html")
+
+	// Find .env file
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %s", err)
+	}
+
+	// Read environment variables
+	dbHost = os.Getenv("DB_HOST")
+	dbUser = os.Getenv("DB_USER")
+	dbPass = os.Getenv("DB_PASS")
+
+	tmpl, err = template.ParseGlob("*.html")
 	if err != nil {
 		fmt.Println("Parsing Templates Error:")
 		panic(err.Error)
 	}
 
-	http.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
-		filePath := "." + r.URL.Path
-		http.ServeFile(w, r, filePath)
-	})
+	// http.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
+	// 	filePath := "." + r.URL.Path
+	// 	http.ServeFile(w, r, filePath)
+	// })
 
-	http.HandleFunc("/cloud_blog/", func(w http.ResponseWriter, r *http.Request) {
-		filePath := "." + r.URL.Path
-		http.ServeFile(w, r, filePath)
-	})
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("***Login Handler running***")
-		tmpl.ExecuteTemplate(w, "login.html", nil)
-	})
+	// http.HandleFunc("/cloud_blog/", func(w http.ResponseWriter, r *http.Request) {
+	// 	filePath := "." + r.URL.Path
+	// 	http.ServeFile(w, r, filePath)
+	// })
 
 	http.HandleFunc("/register", registerUser)
-
+	http.HandleFunc("/", login)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func registerUser(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseGlob("*.html")
+// func registerUser(w http.ResponseWriter, r *http.Request) {
+// 	fmt.Println("***Register Users on the CIMS platform***")
+
+// 	if r.Method == "POST" {
+// 		http.Redirect(w, r, "/registerauth", http.StatusSeeOther)
+// 		return
+// 	}
+
+// }
+
+func login(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("***login running***")
+
+	tmpl.ExecuteTemplate(w, "login.html", nil)
+
+	// Parse the form data
+	err = r.ParseForm()
 	if err != nil {
-		fmt.Println("Parsing Templates Error:")
-		panic(err.Error)
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
 	}
 
-	fmt.Println("***Register Users on the CIMS platform***")
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	fmt.Println("Username:", username)
+	fmt.Println("Password:", password)
+
+	// create hash from password
+	var hash []byte
+
+	// func GenerateFromPassword(password []byte, cost int) ([]byte, error)
+	hash, err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println("bcrypt err:", err)
+		tmpl.ExecuteTemplate(w, "registration.html", "there was a problem registering account")
+		return
+	}
+
+	user := Userlogin{
+		Username: username,
+		Password: string(hash),
+	}
+
+	verifyuser(user)
+
+}
+
+func registerUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("***RegisterUsersAuth running***")
+
 	tmpl.ExecuteTemplate(w, "registration.html", nil)
 
 	// Parse the form data
@@ -156,20 +217,49 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 
 	// check if username already exists for availability
 	insertData(user, "cims", username)
+	fmt.Fprint(w, "congrats, your account has been successfully created")
+}
+
+func verifyuser(record Userlogin) bool {
+	// Use the SetServerAPIOptions() method to set the version of the Stable API on the client
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI("mongodb+srv://" + dbUser + ":" + url.QueryEscape(dbPass) + dbHost).SetServerAPIOptions(serverAPI)
+
+	// Create a new client and connect to the server
+	client, err := mongo.Connect(context.TODO(), opts)
+	if err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		if err = client.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}()
+
+	collection := client.Database("testting").Collection("cims")
+
+	// Check username availability
+	var existingUser User
+	err = collection.FindOne(context.Background(), bson.M{"username": record.Username}).Decode(&existingUser)
+	if err == nil {
+		// User name already exists, handle the case accordingly
+		fmt.Println("User name already exists:", existingUser.Username)
+		return false
+	} else if err != mongo.ErrNoDocuments {
+		// Error occurred during the query
+		panic(err)
+	} else {
+		// Insert Document
+		_, err = collection.InsertOne(context.TODO(), record)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return true
 }
 
 func insertData(record any, table string, primarykey string) {
-
-	// Find .env file
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error loading .env file: %s", err)
-	}
-
-	// Read environment variables
-	dbHost := os.Getenv("DB_HOST")
-	dbUser := os.Getenv("DB_USER")
-	dbPass := os.Getenv("DB_PASS")
 
 	// Use the SetServerAPIOptions() method to set the version of the Stable API on the client
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
