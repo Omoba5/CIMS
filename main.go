@@ -25,11 +25,6 @@ func main() {
 		http.ServeFile(w, r, filePath)
 	})
 
-	http.HandleFunc("/blogs/", func(w http.ResponseWriter, r *http.Request) {
-		filePath := "./assets/" + r.URL.Path
-		http.ServeFile(w, r, filePath)
-	})
-
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		tmpl.ExecuteTemplate(w, "registration.html", nil)
 	})
