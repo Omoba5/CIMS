@@ -2,6 +2,7 @@ package main
 
 import (
 	"cims/internal"
+	"cims/internal/ssh"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -14,6 +15,11 @@ func main() {
 		fmt.Println("Parsing Templates Error:")
 		panic(err.Error)
 	}
+
+	http.Handle("/static/css/", http.StripPrefix("/static/css/", http.FileServer(http.Dir("./internal/ssh/static/css/"))))
+	http.Handle("/static/js/", http.StripPrefix("/static/js/", http.FileServer(http.Dir("./internal/ssh/static/js/"))))
+	http.HandleFunc("/ssh", ssh.Home)
+	http.HandleFunc("/ws/v1", ssh.WsHandle)
 
 	http.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
 		filePath := "." + r.URL.Path
@@ -33,6 +39,3 @@ func main() {
 
 	http.ListenAndServe(":8080", nil)
 }
-
-
-
