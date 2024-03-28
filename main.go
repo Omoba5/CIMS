@@ -8,7 +8,6 @@ import (
 	"net/http"
 )
 
-
 func main() {
 	tmpl, err := template.ParseGlob("./views/*.html")
 	if err != nil {
