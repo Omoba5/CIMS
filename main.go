@@ -1,7 +1,6 @@
 package main
 
 import (
-	"cims/internal"
 	"cims/internal/ssh"
 	"fmt"
 	"html/template"
@@ -29,7 +28,41 @@ func main() {
 		tmpl.ExecuteTemplate(w, "registration.html", nil)
 	})
 
-	http.HandleFunc("/register", internal.RegisterUser)
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "login.html", nil)
+	})
+
+	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "registration.html", nil)
+	})
+
+	http.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "dashboard.html", nil)
+	})
+
+	http.HandleFunc("/virtualMachines", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "virtual_machines.html", nil)
+	})
+
+	http.HandleFunc("/infastructureOverview", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "infastructure_overview.html", nil)
+	})
+
+	http.HandleFunc("/network&subnets", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "network_subnets.html", nil)
+	})
+
+	http.HandleFunc("/firewallRules", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "firewall_rules.html", nil)
+	})
+
+	http.HandleFunc("/bestPractices", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "best_practices.html", nil)
+	})
+
+	http.HandleFunc("/cloudEdu", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "cloud_edu.html", nil)
+	})
 
 	http.ListenAndServe(":8080", nil)
 }
