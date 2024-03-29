@@ -52,7 +52,7 @@ func main() {
 		tmpl.ExecuteTemplate(w, "network_subnets.html", nil)
 	})
 
-	http.HandleFunc("/network&firewallRules", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/firewallRules", func(w http.ResponseWriter, r *http.Request) {
 		tmpl.ExecuteTemplate(w, "firewall_rules.html", nil)
 	})
 
