@@ -9,19 +9,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func RegisterUser(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseGlob("./views/*.html")
+var tmpl *template.Template
+
+func init() {
+	// Parse templates
+	var err error
+	tmpl, err = template.ParseGlob("./views/*.html")
 	if err != nil {
-		fmt.Println("Parsing Templates Error:")
-		panic(err.Error)
+		panic(err)
 	}
+}
 
-	tmpl.ExecuteTemplate(w, "registration.html", nil)
-
+func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	// Parse the form data
-	err = r.ParseForm()
+	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		tmpl.ExecuteTemplate(w, "registration.html", "Failed to Parse Form")
 		return
 	}
 
@@ -68,5 +71,52 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check if username already exists for availability
-	InsertData(user, "cims", username)
+	err2 := InsertData(user, username)
+	if err2 == nil {
+		// You can redirect the user to a dashboard or any other page upon successful login
+		tmpl.ExecuteTemplate(w, "login.html", "Registration Successful")
+		return
+	}
+
+}
+
+func LoginUser(w http.ResponseWriter, r *http.Request) {
+	// Parse the form data
+	err := r.ParseForm()
+	if err != nil {
+		tmpl.ExecuteTemplate(w, "login.html", "Failed to parse form")
+		// http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	// Access form values
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	fmt.Println("Username:", username)
+	fmt.Println("Password:", password)
+
+	// Retrieve user from the database based on the provided username
+	user, err := GetUser(username)
+	fmt.Println(user)
+	if err != nil {
+		fmt.Println("Error retrieving user:", err)
+		http.Error(w, "Error retrieving user", http.StatusInternalServerError)
+		return
+	}
+
+	// Check if user exists and verify password
+	if user != nil && bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) == nil {
+		// User exists and password matches, authentication successful
+		fmt.Println("Login successful for user:", username)
+		// You can redirect the user to a dashboard or any other page upon successful login
+		http.Redirect(w, r, "/dashboard", http.StatusFound)
+		return
+	} else {
+		// Invalid username or password
+		fmt.Println("Invalid username or password")
+		// You can render an error message on the login page
+		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+		return
+	}
 }

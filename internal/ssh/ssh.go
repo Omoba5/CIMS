@@ -20,9 +20,9 @@ var (
 			return true
 		},
 	}
-	user     = "ogabiprince"
-	password = "ogabi"
-	host     = "35.238.116.196"
+	user     = "anothername"
+	password = "biggersecret"
+	host     = "35.225.105.138"
 	port     = 22
 )
 

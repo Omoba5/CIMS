@@ -60,6 +60,10 @@
             max-width: 300px;
             margin: auto;
         }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
     
         input[type="text"],
         input[type="password"] {
@@ -122,7 +126,8 @@
             .cims-title {
                 font-size: 30px;
             }
-        }
+}
+        
     </style>
 </head>
 
@@ -130,11 +135,17 @@
     <div class="containert">
         <div class="left-section"></div>
         <div class="right-section">
-            <form style="max-width: 80%;">
+            <form action="/login" method="post" style="max-width: 80%;">
                 <h1 class="cims-title">Cloud Infastructure Management System</h1>
+                <br>
+                {{if .}}
+                    <span style="color: red;">{{.}}</span>
+                {{end}}
+                <br>
                 <input type="text" name="username" placeholder="Username" required>
                 <input type="password" name="password" placeholder="Password" required>
-                <input type="submit" value="SIGN IN">
+                <input class="button" type="submit" value="SIGN IN">
+                <a href="/register" style="margin-top: 30px; display: block; text-align: center;">New User?</a>
             </form>
         </div>
     </div>

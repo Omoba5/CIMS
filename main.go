@@ -1,11 +1,14 @@
 package main
 
 import (
+	"cims/internal"
 	"cims/internal/ssh"
 	"fmt"
 	"html/template"
 	"net/http"
 )
+
+// var tmpl *template.Template
 
 func main() {
 	tmpl, err := template.ParseGlob("./views/*.html")
@@ -25,16 +28,14 @@ func main() {
 	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tmpl.ExecuteTemplate(w, "registration.html", nil)
-	})
-
-	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		tmpl.ExecuteTemplate(w, "login.html", nil)
 	})
+	http.HandleFunc("/login", internal.LoginUser)
 
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		tmpl.ExecuteTemplate(w, "registration.html", nil)
 	})
+	http.HandleFunc("/registerauth", internal.RegisterUser)
 
 	http.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
 		tmpl.ExecuteTemplate(w, "dashboard.html", nil)

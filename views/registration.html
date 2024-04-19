@@ -12,8 +12,12 @@
     <div class="register-container">
         <div class="left-section"></div>
         <div class="right-section">
-            <form style="max-width: 80%;">
+            <form action="/registerauth" style="max-width: 80%;" method="post">
                 <h1 class="cims-title">Cloud Infastructure Management System</h1>
+                <br>
+                {{if .}}
+                    <span style="color: red;">{{.}}</span>
+                {{end}}
                 <h3>Account Credentials</h3>
                 <input type="text" name="username" placeholder="Username" required>
                 <input type="password" name="password" placeholder="Password" required>
