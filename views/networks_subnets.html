@@ -1,10 +1,140 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Infrastructure Management System</title>
+  <script src="https://unpkg.com/htmx.org@^1.5.0/dist/htmx.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #fff;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    h2 {
+      color: #000;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #000;
+      color: #fff;
+    }
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .button-container .button-group {
+      display: flex;
+      align-items: center;
+    }
+    .button-container .button-group .button {
+      margin-right: 10px;
+    }
+    .button{
+      text-decoration: none;
+    }
+    .button.refresh {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .button.refresh:hover {
+      background-color: #218838;
+    }
+    .button-group-below {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .button-group-below .button {
+      margin-right: 10px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .button-group-below .button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-    <p>Networs and subnets</p>
+  <div class="button-container">
+    <h2>Manage Networks</h2>
+    <button class="button refresh">Refresh</button>
+  </div>
+  <div id="network-message"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Select</th>
+        <th>Name</th>
+        <th>Subnets</th>
+        <th>MTU</th>
+        <th>Internal IP Ranges</th>
+        <th>Gateways</th>
+        <th>Firewall Rules</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="checkbox"></td>
+        <td>bignet1</td>
+        <td>2</td>
+        <td>1460</td>
+        <td>10.23.0.0/26</td>
+        <td>10.23.0.1</td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox"></td>
+        <td>bignet2</td>
+        <td>3</td>
+        <td>1500</td>
+        <td>10.24.0.0/24</td>
+        <td>10.24.0.1</td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox"></td>
+        <td>bignet3</td>
+        <td>1</td>
+        <td>1300</td>
+        <td>10.25.0.0/28</td>
+        <td>10.25.0.1</td>
+        <td>2</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="button-group-below">
+    <a href="/createNetwork" class="button">Create</a>
+    <button class="button">Modify</button>
+    <button class="button">Delete</button>
+  </div>
 </body>
 </html>

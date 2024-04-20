@@ -71,7 +71,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check if username already exists for availability
-	err2 := InsertData(user, username)
+	err2 := InsertData(user, username, "cims")
 	if err2 == nil {
 		// You can redirect the user to a dashboard or any other page upon successful login
 		tmpl.ExecuteTemplate(w, "login.html", "Registration Successful")
@@ -97,7 +97,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Password:", password)
 
 	// Retrieve user from the database based on the provided username
-	user, err := GetUser(username)
+	user, err := GetUser(username, "cims")
 	fmt.Println(user)
 	if err != nil {
 		fmt.Println("Error retrieving user:", err)
@@ -109,9 +109,21 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	if user != nil && bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) == nil {
 		// User exists and password matches, authentication successful
 		fmt.Println("Login successful for user:", username)
+
+		// Set a cookie to store the username
+		cookie := http.Cookie{
+			Name:  "username",
+			Value: username,
+			Path:  "/",
+		}
+
+		// Set the cookie in the response
+		http.SetCookie(w, &cookie)
+
 		// You can redirect the user to a dashboard or any other page upon successful login
 		http.Redirect(w, r, "/dashboard", http.StatusFound)
 		return
+
 	} else {
 		// Invalid username or password
 		fmt.Println("Invalid username or password")

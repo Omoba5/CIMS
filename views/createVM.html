@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Infrastructure Management System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #fff;
+    }
+    h2 {
+      text-align: center;
+      color: #000;
+    }
+    .form-container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 5px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .form-container label {
+      display: block;
+      margin-bottom: 10px;
+    }
+    .form-container input,
+    .form-container select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .button-container .button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .button-container .button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h2>Create VM</h2>
+  <div class="form-container">
+    <form action="/createVMHandle" method="post">
+      <label for="instanceName">Instance Name:</label>
+      <input type="text" id="instanceName" name="instanceName" required>
+      <label for="machineType">Machine Type:</label>
+      <select id="machine-type" name="machine-type" required>
+        <option value="e2-micro">e2-micro (2 vCPU, 1 core, 1 GB memory)</option>
+        <option value="e2-small">e2-small (2 vCPU, 1 core, 2 GB memory)</option>
+        <option value="e2-large">e2-medium (2 vCPU, 1 core, 4 GB memory)</option>
+      </select>      
+      <label for="size">Size (GB):</label>
+      <select id="size" name="size" required>
+        <option value="10">10gb</option>
+        <option value="20">20gb</option>
+        <option value="30">30gb</option>
+      </select>
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+      <div class="button-container">
+        <button class="button" type="submit">Create</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

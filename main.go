@@ -2,7 +2,9 @@ package main
 
 import (
 	"cims/internal"
+	// "cims/internal/resources"
 	"cims/internal/ssh"
+
 	"fmt"
 	"html/template"
 	"net/http"
@@ -11,6 +13,9 @@ import (
 // var tmpl *template.Template
 
 func main() {
+	// // Initialize the compute.Service variable from the resource package
+	// resources.Init()
+
 	tmpl, err := template.ParseGlob("./views/*.html")
 	if err != nil {
 		fmt.Println("Parsing Templates Error:")
@@ -38,32 +43,50 @@ func main() {
 	http.HandleFunc("/registerauth", internal.RegisterUser)
 
 	http.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
+		// Retrieve the username from the cookie
+		_, err := r.Cookie("username")
+		if err != nil {
+			// If the cookie is not found, redirect to the login page
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
 		tmpl.ExecuteTemplate(w, "dashboard.html", nil)
-	})
-
-	http.HandleFunc("/virtualMachines", func(w http.ResponseWriter, r *http.Request) {
-		tmpl.ExecuteTemplate(w, "virtual_machines.html", nil)
 	})
 
 	http.HandleFunc("/infastructureOverview", func(w http.ResponseWriter, r *http.Request) {
 		tmpl.ExecuteTemplate(w, "infastructure_overview.html", nil)
 	})
-
-	http.HandleFunc("/network&subnets", func(w http.ResponseWriter, r *http.Request) {
-		tmpl.ExecuteTemplate(w, "network_subnets.html", nil)
-	})
-
-	http.HandleFunc("/firewallRules", func(w http.ResponseWriter, r *http.Request) {
-		tmpl.ExecuteTemplate(w, "firewall_rules.html", nil)
-	})
-
 	http.HandleFunc("/bestPractices", func(w http.ResponseWriter, r *http.Request) {
 		tmpl.ExecuteTemplate(w, "best_practices.html", nil)
 	})
-
 	http.HandleFunc("/cloudEdu", func(w http.ResponseWriter, r *http.Request) {
 		tmpl.ExecuteTemplate(w, "cloud_edu.html", nil)
 	})
+
+	// Virtual Machine Handlers
+	http.HandleFunc("/virtualMachines", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "virtual_machines.html", nil)
+	})
+	http.HandleFunc("/createVM", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "createVM.html", nil)
+	})
+
+	// Firewall Rules Handlers
+	http.HandleFunc("/firewallRules", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "firewall_rules.html", nil)
+	})
+	http.HandleFunc("/createFirewall", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "createFirewall.html", nil)
+	})
+
+	// Network Handlers
+	http.HandleFunc("/networks", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "networks_subnets.html", nil)
+	})
+	http.HandleFunc("/createNetwork", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "createNetwork.html", nil)
+	})
+	http.HandleFunc("/networkauth", internal.CreateNetworkHandler)
 
 	http.ListenAndServe(":8080", nil)
 }

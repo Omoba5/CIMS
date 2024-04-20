@@ -1,10 +1,150 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Infrastructure Management System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #fff;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    h2 {
+      color: #000;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #000;
+      color: #fff;
+    }
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+    }
+    .checkbox-container input[type="checkbox"] {
+      margin-right: 5px;
+    }
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .button-container .button-group {
+      display: flex;
+      align-items: center;
+    }
+    .button-container .button-group .button {
+      margin-right: 10px;
+    }
+    .button.refresh {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .button.refresh:hover {
+      background-color: #218838;
+    }
+    .button-group-below {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .button-group-below .button {
+      margin-right: 10px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .button-group-below .button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-    <p>Virtual machines</p>
+  <div class="button-container">
+    <h2>Manage Firewall</h2>
+    <button class="button refresh">Refresh</button>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Targets</th>
+        <th>Filters</th>
+        <th>Protocols/Ports</th>
+        <th>Actions</th>
+        <th>Priority</th>
+        <th>Network</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="checkbox"></td>
+        <td>walloffire</td>
+        <td>ingress</td>
+        <td>Apply to all</td>
+        <td>10.2.0.1</td>
+        <td>IP Ranges</td>
+        <td>Allow</td>
+        <td>1000</td>
+        <td>bignet</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox"></td>
+        <td>firewall1</td>
+        <td>egress</td>
+        <td>Specific targets</td>
+        <td>10.2.0.2</td>
+        <td>Port Ranges</td>
+        <td>Block</td>
+        <td>2000</td>
+        <td>othernet</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox"></td>
+        <td>securitywall</td>
+        <td>ingress</td>
+        <td>Apply to all</td>
+        <td>10.2.0.3</td>
+        <td>IP Ranges</td>
+        <td>Allow</td>
+        <td>1500</td>
+        <td>mainnet</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="button-group-below">
+    <button class="button">Create</button>
+    <button class="button">Modify</button>
+    <button class="button">Delete</button>
+  </div>
 </body>
 </html>
