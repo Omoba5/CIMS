@@ -71,7 +71,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check if username already exists for availability
-	err2 := InsertData(user, username, "cims")
+	err2 := InsertDocument(user, username, "cims")
 	if err2 == nil {
 		// You can redirect the user to a dashboard or any other page upon successful login
 		tmpl.ExecuteTemplate(w, "login.html", "Registration Successful")

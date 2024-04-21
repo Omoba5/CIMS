@@ -50,8 +50,8 @@ func CreateNetworkHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Insert data into MongoDB using db_controller.InsertData function
-	err = InsertData(networkData, networkName, "networks")
+	// Insert data into MongoDB using db_controller.InsertDocument function
+	err = InsertDocument(networkData, networkName, "networks")
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error inserting network data: %v", err), http.StatusInternalServerError)
 		return
