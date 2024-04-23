@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -63,4 +64,48 @@ func CreateNetworkHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Redirect to networks_subnets.html for refresh (implement as needed)
 	http.Redirect(w, r, "/networks_subnets.html", http.StatusSeeOther)
+}
+
+func GetNetworkList(w http.ResponseWriter, r *http.Request) {
+	// Marshal the networks to JSON
+	networkJSON, err := resources.GetNetworks(computeService, projectID, "")
+	if err != nil {
+		http.Error(w, "Failed to marshal networks", http.StatusInternalServerError)
+		return
+	}
+
+	// Set response headers and write the JSON response
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(networkJSON)
+	fmt.Println(string(networkJSON))
+}
+
+func DeleteNetworksHandler(w http.ResponseWriter, r *http.Request) {
+	// Parse request body
+	var requestBody struct {
+		Networks []string `json:"networks"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Print the request body as a string
+	requestBodyStr, _ := json.Marshal(requestBody)
+	fmt.Println("Received request body:", string(requestBodyStr))
+
+	// Delete VMs
+	for _, networkName := range requestBody.Networks {
+		err := resources.DeleteNetwork(computeService, projectID, networkName)
+		if err != nil {
+			http.Error(w, "Failed to delete networks", http.StatusInternalServerError)
+			return
+		}
+		fmt.Printf("VM %v deleted successfully", networkName)
+	}
+
+	// Respond with success message
+	w.Header().Set("Content-Type", "application/json")
+	response := map[string]string{"message": "Networks deleted successfully"}
+	json.NewEncoder(w).Encode(response)
 }

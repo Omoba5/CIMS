@@ -90,6 +90,8 @@ func main() {
 		tmpl.ExecuteTemplate(w, "createNetwork.html", nil)
 	})
 	http.HandleFunc("/networkauth", internal.CreateNetworkHandler)
+	http.HandleFunc("/get_network_list", internal.GetNetworkList)
+	http.HandleFunc("/delete_networks", internal.DeleteNetworksHandler)
 
 	http.ListenAndServe(":8080", nil)
 }

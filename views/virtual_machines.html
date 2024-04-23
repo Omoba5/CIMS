@@ -133,13 +133,14 @@
               const row = document.createElement('tr');
               row.innerHTML = `
                 <td><input type="checkbox"></td>
-                <td>${vm.status}</td>
-                <td>${vm.name}</td>
-                <td>${vm.machineType.split('/').pop()}</td>
-                <td>${vm.networkInterfaces[0].accessConfigs[0].natIP || 'N/A'}</td>
-                <td>${vm.networkInterfaces[0].networkIP}</td>
-                <td>${vm.tags && vm.tags.items ? vm.tags.items.join(', ') : 'N/A'}</td>
+                <td>${vm.Status}</td>
+                <td>${vm.InstanceName}</td>
+                <td>${vm.MachineType.split('/').pop()}</td>
+                <td>${vm.ExternalIP || 'N/A'}</td>
+                <td>${vm.InternalIP}</td>
+                <td>${vm.NetworkTags ? vm.NetworkTags.join(', ') : 'N/A'}</td>
                 <td><button class="button-ssh">SSH-in-Browser</button></td>
+
               `;
               vmTableBody.appendChild(row);
             });

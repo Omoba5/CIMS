@@ -1,10 +1,42 @@
 package resources
 
 import (
+	"cims/models"
+	"encoding/json"
 	"fmt"
 
 	"google.golang.org/api/compute/v1"
 )
+
+func GetNetworks(service *compute.Service, projectID string, username string) ([]byte, error) {
+	// List networks in the project
+	networkList, err := service.Networks.List(projectID).Do()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list networks: %v", err)
+	}
+
+	var allNetworks []*models.Network
+
+	// Iterate over the list of networks
+	for _, network := range networkList.Items {
+		// Convert network to Network struct
+		convertedNetwork, err := models.ConvertNetworkToStruct(service, network, username, projectID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert network: %v", err)
+		}
+
+		// Append converted network to slice
+		allNetworks = append(allNetworks, convertedNetwork)
+	}
+
+	// Marshal the slice of JSON objects with indentation
+	finalJSON, err := json.MarshalIndent(allNetworks, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling networks to JSON: %v", err)
+	}
+
+	return finalJSON, nil
+}
 
 func CreateNetwork(service *compute.Service, projectID, networkName string) (*compute.Network, error) {
 	fmt.Printf("Creating network %s in project %s\n", networkName, projectID)

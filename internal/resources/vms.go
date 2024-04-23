@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	// "log"
-	// "strings"
+	"cims/models"
 	"time"
 
 	"google.golang.org/api/compute/v1"
@@ -25,26 +25,22 @@ func GetInstances(service *compute.Service, projectID string) ([]byte, error) {
 		allInstances = append(allInstances, zoneInstances.Instances...)
 	}
 
-	// Create a slice to hold the JSON objects of all instances
-	var jsonInstances []interface{}
+	// Create a slice to hold the instances as VirtualMachine structs
+	var virtualMachines []*models.VirtualMachine
 
-	// Marshal each instance individually and store in the slice
+	// Convert each instance to a VirtualMachine struct
 	for _, instance := range allInstances {
-		instanceJSON, err := json.Marshal(instance)
+		vm, err := models.ConvertVMToStruct(instance, "username") // Replace "username" with the actual username
 		if err != nil {
-			return nil, fmt.Errorf("error marshalling instance %s to JSON: %v", instance.Name, err)
+			return nil, fmt.Errorf("error converting instance %s: %v", instance.Name, err)
 		}
-		var obj interface{}
-		if err := json.Unmarshal(instanceJSON, &obj); err != nil {
-			return nil, fmt.Errorf("error unmarshalling instance JSON: %v", err)
-		}
-		jsonInstances = append(jsonInstances, obj)
+		virtualMachines = append(virtualMachines, vm)
 	}
 
-	// Marshal the slice of JSON objects
-	finalJSON, err := json.MarshalIndent(jsonInstances, "", " ")
+	// Marshal the slice of VirtualMachine structs to JSON
+	finalJSON, err := json.MarshalIndent(virtualMachines, "", " ")
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling all instances to JSON: %v", err)
+		return nil, fmt.Errorf("error marshalling virtual machines to JSON: %v", err)
 	}
 
 	return finalJSON, nil

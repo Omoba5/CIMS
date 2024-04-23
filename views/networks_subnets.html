@@ -11,10 +11,8 @@
       margin: 20px;
       background-color: #fff;
     }
-    h1, h2 {
-      text-align: center;
-    }
     h2 {
+      text-align: center;
       color: #000;
     }
     table {
@@ -46,9 +44,6 @@
     }
     .button-container .button-group .button {
       margin-right: 10px;
-    }
-    .button{
-      text-decoration: none;
     }
     .button.refresh {
       padding: 12px 24px;
@@ -89,7 +84,7 @@
     <button class="button refresh">Refresh</button>
   </div>
   <div id="network-message"></div>
-  <table>
+  <table id="network-table">
     <thead>
       <tr>
         <th>Select</th>
@@ -102,39 +97,82 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td><input type="checkbox"></td>
-        <td>bignet1</td>
-        <td>2</td>
-        <td>1460</td>
-        <td>10.23.0.0/26</td>
-        <td>10.23.0.1</td>
-        <td>4</td>
-      </tr>
-      <tr>
-        <td><input type="checkbox"></td>
-        <td>bignet2</td>
-        <td>3</td>
-        <td>1500</td>
-        <td>10.24.0.0/24</td>
-        <td>10.24.0.1</td>
-        <td>6</td>
-      </tr>
-      <tr>
-        <td><input type="checkbox"></td>
-        <td>bignet3</td>
-        <td>1</td>
-        <td>1300</td>
-        <td>10.25.0.0/28</td>
-        <td>10.25.0.1</td>
-        <td>2</td>
-      </tr>
+      <!-- Network records will be inserted here -->
     </tbody>
   </table>
   <div class="button-group-below">
     <a href="/createNetwork" class="button">Create</a>
     <button class="button">Modify</button>
-    <button class="button">Delete</button>
+    <button class="button delete">Delete</button>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      function refreshNetworkList() {
+        fetch('/get_network_list')
+          .then(response => response.json())
+          .then(data => {
+            const networkTableBody = document.getElementById('network-table').querySelector('tbody');
+            networkTableBody.innerHTML = '';
+
+            const networks = data;
+
+            networks.forEach(network => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td><input type="checkbox"></td>
+                <td>${network.NetworkName}</td>
+                <td>${network.Subnet}</td>
+                <td>${network.MTU}</td>
+                <td>${network.InternalIP}</td>
+                <td>${network.Gateways}</td>
+                <td>${network.FirewallRules}</td>
+              `;
+              networkTableBody.appendChild(row);
+            });
+          });
+
+        const checkboxes = document.querySelectorAll('#network-table tbody input[type="checkbox"]');
+        const deleteButton = document.querySelector('.button.delete');
+
+        checkboxes.forEach(checkbox => {
+          checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('#network-table tbody input[type="checkbox"]:checked').length;
+            deleteButton.disabled = checkedCount === 0;
+          });
+        });
+      }
+
+      refreshNetworkList();
+
+      document.querySelector('.button.refresh').addEventListener('click', function() {
+        refreshNetworkList();
+      });
+
+      document.querySelector('.button.delete').addEventListener('click', function() {
+        const selectedNetworks = [];
+        document.querySelectorAll('#network-table tbody input[type="checkbox"]:checked').forEach(checkbox => {
+          selectedNetworks.push(checkbox.closest('tr').querySelector('td:nth-child(2)').textContent.trim());
+        });
+
+        fetch('/delete_networks', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ networks: selectedNetworks })
+        })
+        .then(response => {
+          if (response.ok) {
+            refreshNetworkList();
+          } else {
+            console.error('Failed to delete networks:', response.statusText);
+          }
+        })
+        .catch(error => {
+          console.error('Error deleting networks:', error);
+        });
+      });
+    });
+  </script>
 </body>
 </html>
