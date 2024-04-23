@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cloud Infrastructure Management System</title>
+  <script src="https://unpkg.com/htmx.org@^1.5.0/dist/htmx.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -84,65 +85,74 @@
     .button-group-below .button:hover {
       background-color: #0056b3;
     }
+    .button-group-below .button-ssh {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #17a2b8;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    .button-group-below .button-ssh:hover {
+      background-color: #138496;
+    }
   </style>
 </head>
 <body>
   <div class="button-container">
-    <h2>Manage Firewall</h2>
+    <h2>Manage Virtual Machines</h2>
     <button class="button refresh">Refresh</button>
   </div>
   <table>
     <thead>
       <tr>
-        <th></th>
+        <th>Select</th>
+        <th>Status</th>
         <th>Name</th>
-        <th>Type</th>
-        <th>Targets</th>
-        <th>Filters</th>
-        <th>Protocols/Ports</th>
-        <th>Actions</th>
-        <th>Priority</th>
-        <th>Network</th>
+        <th>Machine Type</th>
+        <th>External IP</th>
+        <th>Internal IP</th>
+        <th>Network Tags</th>
+        <th>Connect</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td><input type="checkbox"></td>
-        <td>walloffire</td>
-        <td>ingress</td>
-        <td>Apply to all</td>
+        <td>Running</td>
+        <td>instance-1</td>
+        <td>e2-small</td>
         <td>10.2.0.1</td>
-        <td>IP Ranges</td>
-        <td>Allow</td>
-        <td>1000</td>
-        <td>bignet</td>
+        <td>34.23.53.21</td>
+        <td>http, monitor</td>
+        <td><button class="button-ssh">SSH-in-Browser</button></td>
       </tr>
       <tr>
         <td><input type="checkbox"></td>
-        <td>firewall1</td>
-        <td>egress</td>
-        <td>Specific targets</td>
+        <td>Stopped</td>
+        <td>instance-2</td>
+        <td>e2-medium</td>
         <td>10.2.0.2</td>
-        <td>Port Ranges</td>
-        <td>Block</td>
-        <td>2000</td>
-        <td>othernet</td>
+        <td>34.23.53.22</td>
+        <td>http, db</td>
+        <td><button class="button-ssh">SSH-in-Browser</button></td>
       </tr>
       <tr>
         <td><input type="checkbox"></td>
-        <td>securitywall</td>
-        <td>ingress</td>
-        <td>Apply to all</td>
+        <td>Running</td>
+        <td>instance-3</td>
+        <td>e2-large</td>
         <td>10.2.0.3</td>
-        <td>IP Ranges</td>
-        <td>Allow</td>
-        <td>1500</td>
-        <td>mainnet</td>
+        <td>34.23.53.23</td>
+        <td>monitor, db</td>
+        <td><button class="button-ssh">SSH-in-Browser</button></td>
       </tr>
     </tbody>
   </table>
   <div class="button-group-below">
-    <button class="button">Create</button>
+    <a href="/createVM" class="button">Create</a>
     <button class="button">Modify</button>
     <button class="button">Delete</button>
   </div>

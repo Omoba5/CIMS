@@ -70,6 +70,7 @@ func main() {
 	http.HandleFunc("/createVM", func(w http.ResponseWriter, r *http.Request) {
 		tmpl.ExecuteTemplate(w, "createVM.html", nil)
 	})
+	http.HandleFunc("/vmauth", internal.CreateVMHandler)
 
 	// Firewall Rules Handlers
 	http.HandleFunc("/firewallRules", func(w http.ResponseWriter, r *http.Request) {

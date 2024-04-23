@@ -36,7 +36,7 @@ func GetInstances(service *compute.Service, projectID string) ([]string, error) 
 	return instancelist, nil
 }
 
-func CreateInstance(service *compute.Service, projectID, instanceName, zone, machineType, username, password string, size int64) error {
+func CreateInstance(service *compute.Service, projectID, instanceName, zone, machineType, username, password string, size int64) (*compute.Instance, error) {
 	fmt.Printf("Creating instance %s in project %s\n", instanceName, projectID)
 
 	// Define the startup script
@@ -84,7 +84,7 @@ systemctl reload sshd`, username, username, password)
 	// Call the Instances.Insert method to create the instance
 	op, err := service.Instances.Insert(projectID, zone, instance).Do()
 	if err != nil {
-		return fmt.Errorf("failed to create instance: %v", err)
+		return nil, fmt.Errorf("failed to create instance: %v", err)
 	}
 
 	waitZoneOperation(service, projectID, zone, op.Name, "creating")
@@ -93,13 +93,18 @@ systemctl reload sshd`, username, username, password)
 	// Wait 1- seconds before removing the startup script
 	time.Sleep(10 * time.Second)
 
+	createdVM, err := service.Instances.Get(projectID, zone, instanceName).Do()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to get VM details: %v", err)
+	}
+
 	// Remove startup script from instance
 	err2 := removeStartupScript(service, projectID, instanceName, zone)
 	if err2 != nil {
-		return fmt.Errorf("failed to remove start up script from instance: %v", err)
+		return createdVM, fmt.Errorf("failed to remove start up script from instance: %v", err)
 	}
 
-	return nil
+	return createdVM, nil
 }
 
 func DeleteInstance(service *compute.Service, projectID, instanceName, zone string) error {

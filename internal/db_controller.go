@@ -130,12 +130,12 @@ func GetFirewall(username, firewallName, table string) ([]*models.FirewallRule, 
 	return firewalls, nil
 }
 
-func GetVirtualMachine(username, vmName, table string) ([]*models.VirtualMachine, error) {
+func GetVirtualMachine(username, instanceName, table string) ([]*models.VirtualMachine, error) {
 	// Access the MongoDB collection
 	collection := client.Database("testting").Collection(table)
 
 	// Define filter for finding user by username
-	filter := bson.M{"username": username, "vmname": vmName}
+	filter := bson.M{"username": username, "instanceName": instanceName}
 
 	// Find network documents matching the filter
 	cursor, err := collection.Find(ctx, filter)

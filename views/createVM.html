@@ -57,7 +57,7 @@
 <body>
   <h2>Create VM</h2>
   <div class="form-container">
-    <form action="/createVMHandle" method="post">
+    <form action="/vmauth" method="post">
       <label for="instanceName">Instance Name:</label>
       <input type="text" id="instanceName" name="instanceName" required>
       <label for="machineType">Machine Type:</label>
@@ -77,7 +77,7 @@
       <label for="password">Password:</label>
       <input type="password" id="password" name="password" required>
       <div class="button-container">
-        <button class="button" type="submit">Create</button>
+        <button class="button" type="submit">Create Instance</button>
       </div>
     </form>
   </div>
