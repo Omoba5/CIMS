@@ -3,14 +3,15 @@ package resources
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	// "log"
+	// "strings"
 	"time"
 
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/googleapi"
 )
 
-func GetInstances(service *compute.Service, projectID string) ([]string, error) {
+func GetInstances(service *compute.Service, projectID string) ([]byte, error) {
 	// List instances aggregated by zone in the project
 	instancesList, err := service.Instances.AggregatedList(projectID).Do()
 	if err != nil {
@@ -24,20 +25,33 @@ func GetInstances(service *compute.Service, projectID string) ([]string, error) 
 		allInstances = append(allInstances, zoneInstances.Instances...)
 	}
 
-	var instancelist []string
+	// Create a slice to hold the JSON objects of all instances
+	var jsonInstances []interface{}
+
+	// Marshal each instance individually and store in the slice
 	for _, instance := range allInstances {
-		jsonInstances, err := json.MarshalIndent(instance, "", " ")
+		instanceJSON, err := json.Marshal(instance)
 		if err != nil {
-			log.Fatalf("Error Marshalling instances to json: %v", err)
+			return nil, fmt.Errorf("error marshalling instance %s to JSON: %v", instance.Name, err)
 		}
-		instancelist = append(instancelist, string(jsonInstances))
+		var obj interface{}
+		if err := json.Unmarshal(instanceJSON, &obj); err != nil {
+			return nil, fmt.Errorf("error unmarshalling instance JSON: %v", err)
+		}
+		jsonInstances = append(jsonInstances, obj)
 	}
 
-	return instancelist, nil
+	// Marshal the slice of JSON objects
+	finalJSON, err := json.MarshalIndent(jsonInstances, "", " ")
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling all instances to JSON: %v", err)
+	}
+
+	return finalJSON, nil
 }
 
 func CreateInstance(service *compute.Service, projectID, instanceName, zone, machineType, username, password string, size int64) (*compute.Instance, error) {
-	fmt.Printf("Creating instance %s in project %s\n", instanceName, projectID)
+	fmt.Printf("Creating instance \"%s\" in project %s\n", instanceName, projectID)
 
 	// Define the startup script
 	startupScript := fmt.Sprintf(`#!/bin/bash
@@ -88,14 +102,14 @@ systemctl reload sshd`, username, username, password)
 	}
 
 	waitZoneOperation(service, projectID, zone, op.Name, "creating")
-	fmt.Printf("Instance %s created successfully!\n", instanceName)
+	fmt.Printf("Instance \"%s\" created successfully!\n", instanceName)
 
 	// Wait 1- seconds before removing the startup script
 	time.Sleep(10 * time.Second)
 
 	createdVM, err := service.Instances.Get(projectID, zone, instanceName).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get VM details: %v", err)
+		return nil, fmt.Errorf("failed to get vm details: %v", err)
 	}
 
 	// Remove startup script from instance
@@ -108,7 +122,7 @@ systemctl reload sshd`, username, username, password)
 }
 
 func DeleteInstance(service *compute.Service, projectID, instanceName, zone string) error {
-	fmt.Printf("Deleting instance %s in project %s\n", instanceName, projectID)
+	fmt.Printf("Deleting instance \"%s\" in project %s\n", instanceName, projectID)
 
 	// Call the Instances.Delete method to create the instance
 	op, err := service.Instances.Delete(projectID, zone, instanceName).Do()
@@ -117,7 +131,7 @@ func DeleteInstance(service *compute.Service, projectID, instanceName, zone stri
 	}
 
 	waitZoneOperation(service, projectID, zone, op.Name, "deleting")
-	fmt.Printf("Instance %s deleted successfully!\n", instanceName)
+	fmt.Printf("Instance \"%s\" deleted successfully!\n", instanceName)
 	return nil
 }
 
@@ -152,7 +166,7 @@ func ChangeInstanceState(service *compute.Service, projectID, zone, instanceName
 }
 
 func UpdateBootDiskSize(service *compute.Service, projectID, zone, instanceName string, newDiskSizeGb int64) error {
-	fmt.Printf("Updating boot disk size for instance %s in project %s\n", instanceName, projectID)
+	fmt.Printf("Updating boot disk size for instance \"%s\" in project %s\n", instanceName, projectID)
 
 	// Resize the boot disk
 	op, err := service.Disks.Resize(projectID, zone, instanceName, &compute.DisksResizeRequest{

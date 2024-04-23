@@ -11,10 +11,8 @@
       margin: 20px;
       background-color: #fff;
     }
-    h1, h2 {
-      text-align: center;
-    }
     h2 {
+      text-align: center;
       color: #000;
     }
     table {
@@ -33,13 +31,6 @@
     th {
       background-color: #000;
       color: #fff;
-    }
-    .checkbox-container {
-      display: flex;
-      align-items: center;
-    }
-    .checkbox-container input[type="checkbox"] {
-      margin-right: 5px;
     }
     .button-container {
       display: flex;
@@ -105,7 +96,7 @@
     <h2>Manage Virtual Machines</h2>
     <button class="button refresh">Refresh</button>
   </div>
-  <table>
+  <table id="vm-table">
     <thead>
       <tr>
         <th>Select</th>
@@ -119,42 +110,83 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td><input type="checkbox"></td>
-        <td>Running</td>
-        <td>instance-1</td>
-        <td>e2-small</td>
-        <td>10.2.0.1</td>
-        <td>34.23.53.21</td>
-        <td>http, monitor</td>
-        <td><button class="button-ssh">SSH-in-Browser</button></td>
-      </tr>
-      <tr>
-        <td><input type="checkbox"></td>
-        <td>Stopped</td>
-        <td>instance-2</td>
-        <td>e2-medium</td>
-        <td>10.2.0.2</td>
-        <td>34.23.53.22</td>
-        <td>http, db</td>
-        <td><button class="button-ssh">SSH-in-Browser</button></td>
-      </tr>
-      <tr>
-        <td><input type="checkbox"></td>
-        <td>Running</td>
-        <td>instance-3</td>
-        <td>e2-large</td>
-        <td>10.2.0.3</td>
-        <td>34.23.53.23</td>
-        <td>monitor, db</td>
-        <td><button class="button-ssh">SSH-in-Browser</button></td>
-      </tr>
+      <!-- Virtual machine records will be inserted here -->
     </tbody>
   </table>
   <div class="button-group-below">
     <a href="/createVM" class="button">Create</a>
     <button class="button">Modify</button>
-    <button class="button">Delete</button>
+    <button class="button delete">Delete</button>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      function refreshVMList() {
+        fetch('/get_vm_list')
+          .then(response => response.json())
+          .then(data => {
+            const vmTableBody = document.getElementById('vm-table').querySelector('tbody');
+            vmTableBody.innerHTML = '';
+
+            const vms = data;
+
+            vms.forEach(vm => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td><input type="checkbox"></td>
+                <td>${vm.status}</td>
+                <td>${vm.name}</td>
+                <td>${vm.machineType.split('/').pop()}</td>
+                <td>${vm.networkInterfaces[0].accessConfigs[0].natIP || 'N/A'}</td>
+                <td>${vm.networkInterfaces[0].networkIP}</td>
+                <td>${vm.tags && vm.tags.items ? vm.tags.items.join(', ') : 'N/A'}</td>
+                <td><button class="button-ssh">SSH-in-Browser</button></td>
+              `;
+              vmTableBody.appendChild(row);
+            });
+          });
+
+        const checkboxes = document.querySelectorAll('#vm-table tbody input[type="checkbox"]');
+        const deleteButton = document.querySelector('.button.delete');
+
+        checkboxes.forEach(checkbox => {
+          checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('#vm-table tbody input[type="checkbox"]:checked').length;
+            deleteButton.disabled = checkedCount === 0;
+          });
+        });
+      }
+
+      refreshVMList();
+
+      document.querySelector('.button.refresh').addEventListener('click', function() {
+        refreshVMList();
+      });
+
+      document.querySelector('.button.delete').addEventListener('click', function() {
+        const selectedVMs = [];
+        document.querySelectorAll('#vm-table tbody input[type="checkbox"]:checked').forEach(checkbox => {
+          selectedVMs.push(checkbox.closest('tr').querySelector('td:nth-child(3)').textContent.trim());
+        });
+
+        fetch('/delete_vms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ vms: selectedVMs })
+        })
+        .then(response => {
+          if (response.ok) {
+            refreshVMList();
+          } else {
+            console.error('Failed to delete VMs:', response.statusText);
+          }
+        })
+        .catch(error => {
+          console.error('Error deleting VMs:', error);
+        });
+      });
+    });
+  </script>
 </body>
 </html>

@@ -71,6 +71,8 @@ func main() {
 		tmpl.ExecuteTemplate(w, "createVM.html", nil)
 	})
 	http.HandleFunc("/vmauth", internal.CreateVMHandler)
+	http.HandleFunc("/get_vm_list", internal.GetVirtualMachineList)
+	http.HandleFunc("/delete_vms", internal.DeleteVMsHandler)
 
 	// Firewall Rules Handlers
 	http.HandleFunc("/firewallRules", func(w http.ResponseWriter, r *http.Request) {
