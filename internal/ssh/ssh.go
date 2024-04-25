@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -29,6 +28,13 @@ var (
 	count    = 0
 )
 
+type SSHLogin struct {
+    Username string `json:"username"`
+    Password string `json:"password"`
+    IP       string `json:"ip"`
+}
+
+
 type SSHConnect struct {
 	session    *ssh.Session
 	stdinPipe  io.WriteCloser
@@ -38,48 +44,88 @@ type SSHConnect struct {
 }
 
 func Home(w http.ResponseWriter, r *http.Request) {
+
+
+	// if r.Method != http.MethodPost {
+    //     http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+    //     return
+    // }
+
+    // Parse the form data
+    err := r.ParseForm()
+    if err != nil {
+        http.Error(w, "Error parsing form data", http.StatusInternalServerError)
+        return
+    }
+
+    // Get the values from the form
+    username := r.Form.Get("username")
+    pass := r.Form.Get("password")
+	ip := r.Form.Get("ip")
+
+    // Do something with the form data (e.g., save it to a database)
+    // For demonstration purposes, we'll just print the data
+    fmt.Printf("Received form submission - Name: %s, Email: %s\n", username, password)
+
+    // Respond with a message
+    fmt.Fprintf(w, "Form submitted successfully!")
+	
+	user = username
+	password = pass
+	host = ip
+
 	temp, e := template.ParseFiles("./internal/ssh/template/ssh.html")
 	if e != nil {
 		fmt.Println(e)
 	}
 
-	// Log the raw request body
-	bodyBytes, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Check if the request body is empty
-	if len(bodyBytes) == 0 {
-		http.Error(w, "Empty request body", http.StatusBadRequest)
-		return
-	}
-
-	// Decode the request body into the requestBody struct
-	var requestBody struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-		IP       string `json:"ip"`
-	}
-	if err := json.Unmarshal(bodyBytes, &requestBody); err != nil {
-		http.Error(w, "Failed to decode request body: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// Extract username, password, and IP from the request body
-	username := requestBody.Username
-	pass := requestBody.Password
-	ip := requestBody.IP
-	count++
-
-	fmt.Println("Received credentials: username:", username, ", password:", password, ", ip:", ip, " count:", count) // Log received data
-
-	// Assign values to global pointers (consider security implications!)
-	user = username
-	password = pass
-	host = ip
 	temp.Execute(w, nil)
+
+
+
+
+	// temp, e := template.ParseFiles("./internal/ssh/template/ssh.html")
+	// if e != nil {
+	// 	fmt.Println(e)
+	// }
+
+	// // Log the raw request body
+	// bodyBytes, err := io.ReadAll(r.Body)
+	// if err != nil {
+	// 	http.Error(w, "Failed to read request body: "+err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// // Check if the request body is empty
+	// if len(bodyBytes) == 0 {
+	// 	http.Error(w, "Empty request body", http.StatusBadRequest)
+	// 	return
+	// }
+
+	// // Decode the request body into the requestBody struct
+	// var requestBody struct {
+	// 	Username string `json:"username"`
+	// 	Password string `json:"password"`
+	// 	IP       string `json:"ip"`
+	// }
+	// if err := json.Unmarshal(bodyBytes, &requestBody); err != nil {
+	// 	http.Error(w, "Failed to decode request body: "+err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
+
+	// // Extract username, password, and IP from the request body
+	// username := requestBody.Username
+	// pass := requestBody.Password
+	// ip := requestBody.IP
+	// count++
+
+	// fmt.Println("Received credentials: username:", username, ", password:", password, ", ip:", ip, " count:", count) // Log received data
+
+	// // Assign values to global pointers (consider security implications!)
+	// user = username
+	// password = pass
+	// host = ip
+	// temp.Execute(w, nil)
 
 	// *user = "some"  // Remove hardcoded values
 	// *password = "SOME"
