@@ -1,10 +1,112 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Infrastructure Management System</title>
 </head>
+
 <body>
-    <p>Firewall rules</p>
+  <h1>CLOUD INFRASTRUCTURE MANAGEMENT SYSTEM</h1>
+  <h2>Manage Firewall Rules</h2> <!-- Added heading -->
+  <div class="filter-container">
+    <label for="filter">Filter by Name or Description:</label>
+    <input type="text" id="filter" name="filter">
+  </div>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Targets</th>
+          <th>Filters</th>
+          <th>Protocols/Ports</th>
+          <th>Actions</th>
+          <th>Priority</th>
+          <th>Network</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>walloffire</td>
+          <td>ingress</td>
+          <td>Apply to all</td>
+          <td>10.2.0.1</td>
+          <td>IP Ranges</td>
+          <td>Allow</td>
+          <td>1000</td>
+          <td>bignet</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="action-buttons">
+    <button>Create</button>
+    <button>Modify</button>
+    <button>Delete</button>
+    <button>Refresh</button>
+  </div>
 </body>
+
+<style>
+    body {
+  font-family: sans-serif;
+}
+
+h1,
+h2 {
+  text-align: center;
+  padding: 20px;
+}
+
+.filter-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-container label {
+  flex: 2;
+}
+
+.filter-container input {
+  flex: 8;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+</style>
+
 </html>

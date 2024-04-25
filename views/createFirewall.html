@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Firewall Rule</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #fff;
+    }
+    h2 {
+      text-align: center;
+      color: #000;
+    }
+    .form-container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 5px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .form-container label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .form-container input[type="text"],
+    .form-container input[type="password"],
+    .form-container select {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    .form-container button {
+      width: 100%;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .form-container button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h2>Create Firewall Rule</h2>
+  <div class="form-container">
+    <form action="/createFirewallHandle" method="post">
+      <label for="firewallName">Firewall Name:</label>
+      <input type="text" id="firewallName" name="firewallName" value="veryhot" required>
+      <div class="setting-group">
+        <label for="allowAll">Allow All:</label>
+        <input type="radio" id="allowAll" name="firewallAction" value="allowAll">
+      </div>
+      <div class="setting-group">
+        <label for="specifiedProtocols">Specify protocols and ports:</label>
+        <input type="radio" id="specifiedProtocols" name="firewallAction" value="specified" checked>
+        <div class="sub-setting-group" id="specifiedSettings">
+          <label for="protocol">Protocol:</label>
+          <select id="protocol" name="protocol">
+            <option value="tcp">TCP</option>
+            <option value="udp">UDP</option>
+          </select>
+          <label for="ports">Ports (comma separated):</label>
+          <input type="text" id="ports" name="ports" placeholder="e.g., 80, 443" required>
+        </div>
+      </div>
+      <div class="setting-group">
+        <label for="others">Others:</label>
+        <input type="radio" id="others" name="firewallAction" value="others">
+        <div class="sub-setting-group" id="othersSettings" style="display: none;">
+          <label for="otherProtocol">Protocol:</label>
+          <input type="text" id="otherProtocol" name="otherProtocol" required>
+        </div>
+      </div>
+      <label for="targets">Targets:</label>
+      <input type="text" id="targets" name="targets" placeholder="Target Tags seperated by commas" required>
+      <button type="submit">Create Firewall Rule</button>
+    </form>
+  </div>
+  <script>
+    const specifiedSettings = document.getElementById('specifiedSettings');
+    const othersSettings = document.getElementById('othersSettings');
+    
+    const radioButtons = document.querySelectorAll('input[type="radio"]');
+    
+    radioButtons.forEach(radioButton => {
+      radioButton.addEventListener('change', (event) => {
+        if (event.target.id === 'specifiedProtocols') {
+          specifiedSettings.style.display = 'block';
+          othersSettings.style.display = 'none';
+        } else if (event.target.id === 'others') {
+          specifiedSettings.style.display = 'none';
+          othersSettings.style.display = 'block';
+        } else {
+          specifiedSettings.style.display = 'none';
+          othersSettings.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

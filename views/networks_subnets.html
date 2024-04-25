@@ -1,10 +1,177 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Infrastructure Management System</title>
+  <script src="https://unpkg.com/htmx.org@^1.5.0/dist/htmx.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #fff;
+    }
+    h2 {
+      text-align: center;
+      color: #000;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #000;
+      color: #fff;
+    }
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .button-container .button-group {
+      display: flex;
+      align-items: center;
+    }
+    .button-container .button-group .button {
+      margin-right: 10px;
+    }
+    .button.refresh {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .button.refresh:hover {
+      background-color: #218838;
+    }
+    .button-group-below {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .button-group-below .button {
+      margin-right: 10px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .button-group-below .button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-    <p>Networs and subnets</p>
+  <div class="button-container">
+    <h2>Manage Networks</h2>
+    <button class="button refresh">Refresh</button>
+  </div>
+  <div id="network-message"></div>
+  <table id="network-table">
+    <thead>
+      <tr>
+        <th>Select</th>
+        <th>Name</th>
+        <th>Subnets</th>
+        <th>MTU</th>
+        <th>Internal IP Ranges</th>
+        <th>Gateways</th>
+        <th>Firewall Rules</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Network records will be inserted here -->
+    </tbody>
+  </table>
+  <div class="button-group-below">
+    <a href="/createNetwork" class="button">Create</a>
+    <button class="button delete">Delete</button>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      function refreshNetworkList() {
+        fetch('/get_network_list')
+          .then(response => response.json())
+          .then(data => {
+            const networkTableBody = document.getElementById('network-table').querySelector('tbody');
+            networkTableBody.innerHTML = '';
+
+            const networks = data;
+
+            networks.forEach(network => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td><input type="checkbox"></td>
+                <td>${network.NetworkName}</td>
+                <td>${network.Subnet}</td>
+                <td>${network.MTU}</td>
+                <td>${network.InternalIP}</td>
+                <td>${network.Gateways}</td>
+                <td>${network.FirewallRules}</td>
+              `;
+              networkTableBody.appendChild(row);
+            });
+          });
+
+        const checkboxes = document.querySelectorAll('#network-table tbody input[type="checkbox"]');
+        const deleteButton = document.querySelector('.button.delete');
+
+        checkboxes.forEach(checkbox => {
+          checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('#network-table tbody input[type="checkbox"]:checked').length;
+            deleteButton.disabled = checkedCount === 0;
+          });
+        });
+      }
+
+      refreshNetworkList();
+
+      document.querySelector('.button.refresh').addEventListener('click', function() {
+        refreshNetworkList();
+      });
+
+      document.querySelector('.button.delete').addEventListener('click', function() {
+        const selectedNetworks = [];
+        document.querySelectorAll('#network-table tbody input[type="checkbox"]:checked').forEach(checkbox => {
+          selectedNetworks.push(checkbox.closest('tr').querySelector('td:nth-child(2)').textContent.trim());
+        });
+
+        fetch('/delete_networks', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ networks: selectedNetworks })
+        })
+        .then(response => {
+          if (response.ok) {
+            refreshNetworkList();
+          } else {
+            console.error('Failed to delete networks:', response.statusText);
+          }
+        })
+        .catch(error => {
+          console.error('Error deleting networks:', error);
+        });
+      });
+    });
+  </script>
 </body>
 </html>
