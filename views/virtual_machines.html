@@ -139,7 +139,7 @@
                 <td>${vm.ExternalIP || 'N/A'}</td>
                 <td>${vm.InternalIP}</td>
                 <td>${vm.NetworkTags ? vm.NetworkTags.join(', ') : 'N/A'}</td>
-                <td><button class="button-ssh">SSH-in-Browser</button></td>
+                <td><a href="/connect_vm?vm_ip=${vm.ExternalIP}" class="button-ssh">SSH-in-Browser</a></td>
 
               `;
               vmTableBody.appendChild(row);

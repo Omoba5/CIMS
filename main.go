@@ -24,8 +24,13 @@ func main() {
 
 	http.Handle("/static/css/", http.StripPrefix("/static/css/", http.FileServer(http.Dir("./internal/ssh/static/css/"))))
 	http.Handle("/static/js/", http.StripPrefix("/static/js/", http.FileServer(http.Dir("./internal/ssh/static/js/"))))
+
+	// SSH Handlers
 	http.HandleFunc("/ssh", ssh.Home)
 	http.HandleFunc("/ws/v1", ssh.WsHandle)
+	http.HandleFunc("/connect_vm", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "vm_login.html", nil)
+	})
 
 	http.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
 		filePath := "." + r.URL.Path

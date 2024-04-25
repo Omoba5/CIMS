@@ -2,9 +2,11 @@ package ssh
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
+
 	"net"
 	"net/http"
 	"time"
@@ -20,10 +22,11 @@ var (
 			return true
 		},
 	}
-	user     = "anothername"
-	password = "biggersecret"
-	host     = "35.225.105.138"
+	user     = ""
+	password = ""
+	host     = ""
 	port     = 22
+	count    = 0
 )
 
 type SSHConnect struct {
@@ -34,7 +37,55 @@ type SSHConnect struct {
 	//stderr     *bytes.Buffer
 }
 
-//
+func Home(w http.ResponseWriter, r *http.Request) {
+	temp, e := template.ParseFiles("./internal/ssh/template/ssh.html")
+	if e != nil {
+		fmt.Println(e)
+	}
+
+	// Log the raw request body
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Failed to read request body: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Check if the request body is empty
+	if len(bodyBytes) == 0 {
+		http.Error(w, "Empty request body", http.StatusBadRequest)
+		return
+	}
+
+	// Decode the request body into the requestBody struct
+	var requestBody struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+		IP       string `json:"ip"`
+	}
+	if err := json.Unmarshal(bodyBytes, &requestBody); err != nil {
+		http.Error(w, "Failed to decode request body: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Extract username, password, and IP from the request body
+	username := requestBody.Username
+	pass := requestBody.Password
+	ip := requestBody.IP
+	count++
+
+	fmt.Println("Received credentials: username:", username, ", password:", password, ", ip:", ip, " count:", count) // Log received data
+
+	// Assign values to global pointers (consider security implications!)
+	user = username
+	password = pass
+	host = ip
+	temp.Execute(w, nil)
+
+	// *user = "some"  // Remove hardcoded values
+	// *password = "SOME"
+	// *host = "35.247.21.236"
+
+}
 
 // create ssh client
 func CreateSSHClient(user, password, host string, port int) (*ssh.Client, error) {
@@ -146,29 +197,35 @@ func (s *SSHConnect) Recv(conn *websocket.Conn, quit chan int) {
 	}
 }
 
-func (s *SSHConnect) Output(conn *websocket.Conn, quit chan int) {
-	defer Quit(quit)
-	var (
-		read int
-		err  error
-	)
-	tick := time.NewTicker(60 * time.Millisecond)
-	defer tick.Stop()
-Loop:
-	for {
-		select {
-		case <-tick.C:
-			i := make([]byte, 1024)
-			if read, err = s.stdoutPipe.Read(i); err != nil {
-				fmt.Println(err)
-				break Loop
+func (s *SSHConnect) Output(conn *websocket.Conn) (err error) {
+	done := make(chan struct{}) // Channel to signal completion
+
+	go func() {
+		defer close(done)
+		for {
+			data := make([]byte, 4096) // Pre-allocate memory for 4096 bytes
+			if _, err = io.ReadFull(s.stdoutPipe, data); err != nil {
+				if err != io.EOF {
+					fmt.Println("Error reading stdout:", err)
+				}
+				break
 			}
-			if err = WsSendText(conn, i[:read]); err != nil {
-				fmt.Println(err)
-				break Loop
+			if err = WsSendText(conn, data); err != nil {
+				fmt.Println("Error sending data to websocket:", err)
+				break
 			}
 		}
+	}()
+
+	select {
+	case <-done:
+		// Output loop exited, connection might be closed or EOF reached
+	case <-time.After(10 * time.Second):
+		// Timeout to prevent hanging indefinitely
+		fmt.Println("Timeout waiting for SSH output")
 	}
+
+	return err
 }
 
 // test
@@ -236,7 +293,7 @@ func WsHandle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	quit := make(chan int)
-	go sshConn.Output(conn, quit)
+	go sshConn.Output(conn)
 	go sshConn.Recv(conn, quit)
 	<-quit
 }
@@ -264,14 +321,4 @@ func WsSendText(conn *websocket.Conn, b []byte) error {
 		return err
 	}
 	return nil
-
-}
-
-func Home(w http.ResponseWriter, r *http.Request) {
-	temp, e := template.ParseFiles("./internal/ssh/template/ssh.html")
-	if e != nil {
-		fmt.Println(e)
-	}
-	temp.Execute(w, nil)
-	return
 }
